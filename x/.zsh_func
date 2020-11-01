@@ -1,0 +1,47 @@
+#!/bin/bash
+
+print_error() {
+
+	echo "ERROR: $1"
+}
+
+git-get-current-branch() {
+
+	git rev-parse --abbrev-ref HEAD
+}
+
+git-push-force() {
+
+	current_branch=$(git-get-current-branch)
+    if [ "$current_branch" = master ]
+	then
+		print_error "push --force to master"
+        return 1
+    fi
+    git push --force-with-lease
+}
+
+git-save() {
+
+    if [ "$task" = "" ]
+	then
+		print_error "task not set"
+        return 1
+	fi
+
+	#current_branch=$(git-get-current-branch)
+    #if [ "$current_branch" = master ]
+	#then
+	#	print_error "commit to master"
+    #    return 1
+    #fi
+
+	git add \*
+
+    git commit -m "$task"
+}
+
+docker-cleanup-dangling() {
+
+	sudo docker rmi $(sudo docker images -f dangling=true -q)
+}

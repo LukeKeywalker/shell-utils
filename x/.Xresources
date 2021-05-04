@@ -5,12 +5,12 @@ Xcursor.theme: ArchCursorTheme
 ! ~/.config/gtk-3.0/settings.ini
 ! ~/.gtkrc-2.0
 
-URxvt.font:     xft:Fira Code:style=Regular:pixelsize=12
+URxvt.font:     xft:Fira Code:style=SemiBold:pixelsize=12
 URxvt.boldFont:     xft:Fira Code:style=Bold:pixelsize=12
 URxvt.italicFont:   xft:Fira Code:style=Regular:pixelsize=12
 URxvt.boldItalicfont:   xft:Fira Code:style=Regular:pixelsize=12                                              
 
-URxvt.letterSpace: -0.9
+URxvt.letterSpace: -1.4
 URxvt.lineSpace: 0
 URxvt.geometry: 92x24
 URxvt.internalBorder: 9

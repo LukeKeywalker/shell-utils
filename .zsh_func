@@ -10,14 +10,25 @@ git-get-current-branch() {
 	git rev-parse --abbrev-ref HEAD
 }
 
-git-push-force() {
+git-push-upstream() {
 
 	current_branch=$(git-get-current-branch)
-    if [ "$current_branch" = master ]
+	if [ "$current_branch" = "master" ]
 	then
-		print_error "push --force to master"
-        return 1
-    fi
+		print_error "push --set-upstream to master"
+		return 1
+	fi
+	git push --set-upstream origin ${current_branch}
+}
+
+git-push-force() {
+
+#	current_branch=$(git-get-current-branch)
+#    if [ "$current_branch" = master ]
+#	then
+#		print_error "push --force to master"
+#        return 1
+#    fi
     git push --force-with-lease
 }
 
@@ -36,9 +47,29 @@ git-save() {
     #    return 1
     #fi
 
-	git add \*
+    git add \*
 
     git commit -m "$task"
+}
+
+git-rebase-master() {
+
+	current_branch=$(git-get-current-branch)
+	if [ "$current_branch" = "master" ]
+	then
+		print_error "already on master"
+		return 1
+	fi
+	git checkout master
+	git pull
+	git checkout $current_branch
+	git rebase master
+}
+
+git-branchout() {
+
+	git branch $1
+	git checkout $1
 }
 
 docker-cleanup-dangling() {

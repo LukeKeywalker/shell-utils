@@ -1,78 +1,103 @@
-#!/bin/bash
+###############
+# Docker helpers
+################
+
+docker-cleanup-dangling() {
+  docker rmi $(docker images -f dangling=true -q)
+}
+
+###############
+# Git shortcuts
+###############
 
 print_error() {
-
-	echo "ERROR: $1"
+  echo "(╯°□°）╯︵$1"
 }
 
 git-get-current-branch() {
-
-	git rev-parse --abbrev-ref HEAD
-}
-
-git-push-upstream() {
-
-	current_branch=$(git-get-current-branch)
-	if [ "$current_branch" = "master" ]
-	then
-		print_error "push --set-upstream to master"
-		return 1
-	fi
-	git push --set-upstream origin ${current_branch}
+  git rev-parse --abbrev-ref HEAD
 }
 
 git-push-force() {
-
-#	current_branch=$(git-get-current-branch)
-#    if [ "$current_branch" = master ]
-#	then
-#		print_error "push --force to master"
-#        return 1
-#    fi
-    git push --force-with-lease
-}
-
-git-save() {
-
-    if [ "$task" = "" ]
-	then
-		print_error "task not set"
-        return 1
-	fi
-
-	#current_branch=$(git-get-current-branch)
-    #if [ "$current_branch" = master ]
-	#then
-	#	print_error "commit to master"
-    #    return 1
-    #fi
-
-    git add \*
-
-    git commit -m "$task"
+  current_branch=$(git-get-current-branch)
+  if [ "$current_branch" = "master" ]
+  then
+    print_error "push --force to master"
+    return 1
+  fi
+  git push --force-with-lease
 }
 
 git-rebase-master() {
+  current_branch=$(git-get-current-branch)
+  if [ "$current_branch" = "master" ]
+  then
+    print_error "already on master"
+    return 1
+  fi
+  git checkout master
+  git pull
+  git checkout $current_branch
+  git rebase master
+}
 
-	current_branch=$(git-get-current-branch)
-	if [ "$current_branch" = "master" ]
-	then
-		print_error "already on master"
-		return 1
-	fi
-	git checkout master
-	git pull
-	git checkout $current_branch
-	git rebase master
+git-save() {
+  if ! [[ $issue =~ ^[A-Z]*\-[0-9]*$ ]] # check if issue not already set
+  then
+    issue=$(echo $(git-get-current-branch) | grep -o '[A-Z]\+-[0-9]\+') # try get issue from branch name
+    if ! [[ $issue =~ ^[A-Z]*\-[0-9]*$ ]] # check if correct issue ticket name again
+    then
+        print_error "issue ticket not set"
+    #   return 1
+    fi
+  fi
+
+  if [ "$task" = "" ]
+  then
+    print_error "task not set"
+    return 1
+  fi
+
+  #current_branch=$(git-get-current-branch)
+  #if [ "$current_branch" = "master" ]
+  #then
+  #  print_error "comit to master"
+  #  return 1
+  #fi
+
+  git add \*
+
+  git commit -m "$issue $task"
+}
+
+git-add-java() {
+  git add \*.java
 }
 
 git-branchout() {
-
-	git branch $1
-	git checkout $1
+  export previous_git_branch=$(git-get-current-branch)
+  git branch $1
+  git checkout $1
 }
 
-docker-cleanup-dangling() {
-
-	sudo docker rmi $(sudo docker images -f dangling=true -q)
+git-goback() {
+  current_branch=$(git-get-current-branch)
+  git checkout $previous_git_branch
+  export previous_git_branch=$current_branch
 }
+
+git-goto() {
+  export previous_git_branch=$(git-get-current-branch)
+  git checkout $1
+}
+
+git-push-upstream() {
+  current_branch=$(git-get-current-branch)
+  if [ "$current_branch" = "master" ]
+  then
+    print_error "push --set-upstream to master"
+    return 1
+  fi 
+  git push --set-upstream origin ${current_branch}
+}
+
